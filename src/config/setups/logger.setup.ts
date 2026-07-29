@@ -20,7 +20,7 @@ export function setupLogger(app: INestApplication) {
 
         // Metadata added to every Pino log.
         base: {
-            service: 'learning-auth-api',
+            service: 'nestjs-api-starter',
             instanceId:  process.env.APP_INSTANCE_ID ?? randomUUID()
         },
 
