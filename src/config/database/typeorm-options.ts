@@ -47,7 +47,7 @@ export function buildMigrationTypeOrmOptions(): TypeOrmModuleOptions {
         ...buildBaseTypeOrmOptions(),
         migrations: [
             path.resolve(process.cwd(),
-                `${resolveDatabaseRoot()}/core/config/database/migrations/*{.ts,.js}`),
+                `${resolveDatabaseRoot()}/config/database/migrations/*{.ts,.js}`),
         ],
         migrationsRun: false
     }
