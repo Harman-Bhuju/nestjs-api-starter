@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import ormConfig from './config/database/orm.config';
 import ormConfigProd from './config/database/orm.config.prod';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { MessagingModule } from './modules/messaging/messaging.module';
 
 @Module({
   imports: [
@@ -27,6 +28,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
         return configService.getOrThrow<TypeOrmModuleOptions>(configKey);
       },
     }),
+
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

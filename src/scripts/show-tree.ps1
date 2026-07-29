@@ -1,7 +1,8 @@
-#  .\scripts\show-tree.ps1
+# .\src\scripts\show-tree.ps1
 $exclude = @("node_modules", "dist", ".git")
 
-$projectRoot = Split-Path -Parent $PSScriptRoot
+# Go from src/scripts -> src -> project root
+$projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 function Show-Tree {
     param (

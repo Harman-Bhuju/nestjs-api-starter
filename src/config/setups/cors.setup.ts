@@ -8,8 +8,7 @@ export function setupCors(
     logger: pino.Logger,
 ) {
 
-    const isProd =
-        process.env.NODE_ENV === 'production';
+    const isProd = process.env.NODE_ENV === 'production';
 
     // Read allowed frontend origins from the environment.
     const whiteListedDomain = configService.get<string>('WHITELIST');

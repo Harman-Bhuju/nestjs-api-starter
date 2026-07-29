@@ -1,7 +1,6 @@
 import { ConsoleLogger, INestApplication } from "@nestjs/common";
 import pino from "pino";
 import { randomUUID } from 'crypto';
-
 import { PinoNestLogger } from "src/common/logger/pino-nest-logger";
 import { CompositeLogger } from "src/common/logger/composite.logger";
 import { createHttpLogger } from "src/common/middleware/http-logger.middleware";

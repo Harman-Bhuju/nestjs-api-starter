@@ -11,11 +11,7 @@ import { setupCors } from './config/setups/cors.setup';
 async function bootstrap() {
 
   // bufferLogs holds startup logs until our custom logger is registered.
-  const app = await NestFactory.create(AppModule,
-    {
-      bufferLogs: true
-    }
-  );
+  const app = await NestFactory.create(AppModule,{ bufferLogs: true });
 
   const configService = app.get(ConfigService);
 
