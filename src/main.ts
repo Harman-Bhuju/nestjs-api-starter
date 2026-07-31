@@ -36,7 +36,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ExceptionHandler(logger));
 
-  const port = configService.get<number>('PORT') || 8000;
+  const port = configService.get<number>('PORT') || 5000;
   const httpServer = await app.listen(port);
 
   // Tune Node.js HTTP connection timeouts.

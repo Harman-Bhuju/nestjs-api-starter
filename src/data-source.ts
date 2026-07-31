@@ -14,5 +14,5 @@ export default new DataSource(buildDataSourceOptions())
 // npm run migration:run:prod
 // npm run migration:revert:prod
 
-// npm run migration:create -- src/core/CONFIG/migrations/AddUsersTable
-// npm run migration:generate -- src/core/CONFIG/migrations/AddUsersTable
+// npm run migration:create  -- src/config/database/migrations/AddUsersTable
+// npm run migration:generate -- src/config/database/migrations/AddUsersTable
