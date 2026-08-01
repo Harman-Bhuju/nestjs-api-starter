@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 export function setupSwagger(app: INestApplication) {
 
     const config = new DocumentBuilder()
-        .setTitle('Learning Auth Api')
+        .setTitle('NestJS Starter API')
         .setDescription('My custom user authentication API walkthrough')
         .setVersion('1.0.0')
         .addBearerAuth(
