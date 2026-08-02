@@ -6,7 +6,7 @@ import { buildDataSourceOptions } from './config/database/typeorm-options';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-export default new DataSource(buildDataSourceOptions())
+export default new DataSource(buildDataSourceOptions());
 
 // npm run migration:run
 // npm run migration:revert

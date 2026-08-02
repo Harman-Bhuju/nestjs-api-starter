@@ -1,30 +1,27 @@
-import { LoggerService } from "@nestjs/common";
-import pino from "pino";
+import { LoggerService } from '@nestjs/common';
+import pino from 'pino';
 
 // This class wraps Pino so NestJS can use it as its built-in logger
 export class PinoNestLogger implements LoggerService {
-    constructor(
-        private readonly logger: pino.Logger
-    ) { }
+  constructor(private readonly logger: pino.Logger) {}
 
-    log(message: any, ...optionalParams: any[]) {
-        this.logger.info({ extra: optionalParams }, String(message));
-    }
-    error(message: any, ...optionalParams: any[]) {
-        this.logger.error({ extra: optionalParams }, String(message));
-    }
-    warn(message: any, ...optionalParams: any[]) {
-        this.logger.warn({ extra: optionalParams }, String(message));
-    }
-    debug?(message: any, ...optionalParams: any[]) {
-        this.logger.debug({ extra: optionalParams }, String(message));
-    }
-    verbose?(message: any, ...optionalParams: any[]) {
-        this.logger.trace({ extra: optionalParams }, String(message));
-    }
-
+  log(message: any, ...optionalParams: any[]) {
+    this.logger.info({ extra: optionalParams }, String(message));
+  }
+  error(message: any, ...optionalParams: any[]) {
+    this.logger.error({ extra: optionalParams }, String(message));
+  }
+  warn(message: any, ...optionalParams: any[]) {
+    this.logger.warn({ extra: optionalParams }, String(message));
+  }
+  debug?(message: any, ...optionalParams: any[]) {
+    this.logger.debug({ extra: optionalParams }, String(message));
+  }
+  verbose?(message: any, ...optionalParams: any[]) {
+    this.logger.trace({ extra: optionalParams }, String(message));
+  }
 }
-// its  just acting as a translator 
+// its  just acting as a translator
 // NestJS                 Pino
 // ──────────────────────────────
 // log()       ──────────► info()

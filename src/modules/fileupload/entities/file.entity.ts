@@ -2,8 +2,7 @@ import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { FileMetaType } from 'src/common/enums/file-metatype.enum';
 import { FileType } from 'src/common/enums/file-type.enum';
-import { User } from 'src/modules/users/entities/user.entity';
-
+import { User } from 'src/modules/user/entities/user.entity';
 
 /**
  * One row per uploaded file. Only PROFILE (see FileType) is wired up right

@@ -9,20 +9,14 @@ import { setupLogger } from './config/setups/logger.setup';
 import { setupCors } from './config/setups/cors.setup';
 
 async function bootstrap() {
-
   // bufferLogs holds startup logs until our custom logger is registered.
-  const app = await NestFactory.create(AppModule,{ bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   const configService = app.get(ConfigService);
 
-  const logger = setupLogger(app)
-  setupCors(
-    app,
-    configService,
-    logger,
-  );
+  const logger = setupLogger(app);
+  setupCors(app, configService, logger);
   setupSwagger(app);
-
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -30,9 +24,9 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-      forbidNonWhitelisted: true
-    })
-  )
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   app.useGlobalFilters(new ExceptionHandler(logger));
 
@@ -42,6 +36,5 @@ async function bootstrap() {
   // Tune Node.js HTTP connection timeouts.
   httpServer.keepAliveTimeout = 65_000; // 65 seconds
   httpServer.headersTimeout = 66_000; //66 seconds
-
 }
 bootstrap();

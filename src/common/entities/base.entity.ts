@@ -1,8 +1,4 @@
-import {
-  PrimaryColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { StringUtils } from '../utils/string.utils';
 
 /**

@@ -20,7 +20,16 @@ export interface OtpEmailOptions {
  * it's one function parameterized by the bits that actually change.
  */
 export function buildOtpEmailHtml(opts: OtpEmailOptions): string {
-  const { appName, recipientName, otp, eyebrow, intro, accentColor, warning, validityMinutes } = opts;
+  const {
+    appName,
+    recipientName,
+    otp,
+    eyebrow,
+    intro,
+    accentColor,
+    warning,
+    validityMinutes,
+  } = opts;
 
   return `<!DOCTYPE html>
 <html lang="en">

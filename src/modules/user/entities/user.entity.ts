@@ -4,7 +4,6 @@ import { Role } from 'src/common/enums/role.enum';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { File } from 'src/modules/fileupload/entities/file.entity';
 
-
 /**
  * Generic user. Keep this the single source of truth for "who can log in".
  * If a role needs extra fields (e.g. a Driver's licence number), create a
@@ -13,7 +12,7 @@ import { File } from 'src/modules/fileupload/entities/file.entity';
  */
 @Index('idx_user_role', ['role'])
 @Entity('user')
-export class User extends BaseEntity{
+export class User extends BaseEntity {
   @Column()
   firstName!: string;
 

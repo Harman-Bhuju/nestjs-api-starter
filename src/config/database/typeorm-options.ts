@@ -2,7 +2,7 @@ import * as path from 'path';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
 
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { Role } from 'src/modules/auth/entities/role.entity';
 import { Authorization } from 'src/modules/auth/entities/authorization.entity';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
