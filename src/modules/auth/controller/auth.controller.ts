@@ -32,7 +32,7 @@ export class AuthController {
   ) {}
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 10 * 60_000 } }) // Register: Max 5 requests every 10 minutes
   @ApiOperation({ summary: 'Register a new user. OTP sent to email.' })
   @ApiBody({ type: RegisterUserDto })
   @ApiResponse({
@@ -45,6 +45,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 15, ttl: 10 * 60_000 } }) // Verify OTP: Max 15 requests every 10 minutes
   @ApiOperation({
     summary:
       'Verify OTP and email. Returns JWT tokens on success for registration flow.',
@@ -57,7 +58,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 3, ttl: 60 * 60_000 } })
+  @Throttle({ default: { limit: 5, ttl: 10 * 60_000 } }) // Send/Resend OTP: Max 5 requests every 10 minutes
   @ApiOperation({
     summary:
       'Send/resend OTP. Used for both email verification and forgot-password.',
@@ -69,6 +70,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 10 * 60_000 } }) // Change Password: Max 5 requests every 10 minutes
   @ApiOperation({
     summary:
       'Change password. Requires prior OTP verification via /verify-otp.',
@@ -80,7 +82,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 10, ttl: 60_000 } }) // Login: Max 10 requests every 1 minute
   @ApiOperation({ summary: 'Login with email + password. Returns JWT tokens.' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, type: AuthResponseDto })
@@ -96,6 +98,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 60, ttl: 60_000 } }) // Refresh Token: Max 60 requests every 1 minute
   @UseGuards(RefreshTokenGuard)
   @ApiOperation({
     summary:
@@ -114,6 +117,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } }) // Logout: Max 30 requests every 1 minute
   @UseGuards(RefreshTokenGuard)
   @ApiOperation({ summary: 'Logout the current device/session.' })
   @Post('logout')
@@ -126,6 +130,7 @@ export class AuthController {
     return result;
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60 * 60_000 } }) // Logout All Devices: Max 5 requests every 1 hour
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Revoke every session for the current user (all devices).',
