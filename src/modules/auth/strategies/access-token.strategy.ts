@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
-import { AccessTokenPayload } from 'src/common/interfaces/access-token-payload.interface';
+import { AccessTokenPayload } from 'src/modules/auth/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {

@@ -22,6 +22,7 @@ import { OtpVerifyDto } from '../dto/otp-verify.dto';
 import { ResendOtpDto } from '../dto/resend-otp.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { TokenService } from './token.service';
+import { TokenPair } from '../interfaces/token-pair.interface';
 
 const OTP_EXPIRED_MESSAGE = 'OTP has expired. Please request a new one.';
 const MAX_ATTEMPTS_MESSAGE = `Maximum OTP attempts exceeded. Account locked for ${OtpUtils.LOCK_DURATION_MINUTES} minutes.`;
@@ -322,7 +323,7 @@ export class AuthService {
     return { accessToken, refreshToken, user: safeUser as any };
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<TokenPair> {
     return this.tokenService.rotateRefreshToken(refreshToken);
   }
 

@@ -2,7 +2,7 @@ import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base.entity';
 import { Role } from 'src/common/enums/role.enum';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { File } from 'src/modules/fileupload/entities/file.entity';
+import { File } from 'src/modules/file/entities/file.entity';
 
 /**
  * Generic user. Keep this the single source of truth for "who can log in".

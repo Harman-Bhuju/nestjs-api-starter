@@ -5,14 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CookieOptions, Request, Response } from 'express';
-import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { JwtPayload } from 'src/modules/auth/interfaces/jwt-payload.interface';
 import { StringUtils } from 'src/common/utils/string.utils';
 import { User } from 'src/modules/user/entities/user.entity';
 import { RefreshToken } from '../entities/refresh-token.entity';
-import { RefreshTokenPayload } from 'src/common/interfaces/refresh-token-payload.interface';
-import { AccessTokenPayload } from 'src/common/interfaces/access-token-payload.interface';
-import { DecodedRefreshTokenPayload } from 'src/common/interfaces/decoded-refresh-token-payload.interface';
-import { TokenPair } from 'src/common/interfaces/token-pair.interface';
+import { RefreshTokenPayload } from 'src/modules/auth/interfaces/refresh-token-payload.interface';
+import { AccessTokenPayload } from 'src/modules/auth/interfaces/access-token-payload.interface';
+import { DecodedRefreshTokenPayload } from 'src/modules/auth/interfaces/decoded-refresh-token-payload.interface';
+import { TokenPair } from 'src/modules/auth/interfaces/token-pair.interface';
 
 /**
  * Single place that owns: signing tokens, persisting/rotating hashed refresh
@@ -40,9 +40,7 @@ export class TokenService {
   }
 
   /** Issues a fresh access+refresh pair and persists the refresh token's hash. */
-  async issueTokens(
-    user: User,
-  ): Promise<TokenPair> {
+  async issueTokens(user: User): Promise<TokenPair> {
     const payload = this.buildPayload(user);
     const tokenId = StringUtils.generateRandomAlphaNumeric(32);
 
@@ -101,9 +99,7 @@ export class TokenService {
   }
 
   /** Verifies + rotates a refresh token, returning a new pair. Deletes the old one either way. */
-  async rotateRefreshToken(
-    refreshTokenStr: string,
-  ): Promise<TokenPair> {
+  async rotateRefreshToken(refreshTokenStr: string): Promise<TokenPair> {
     const decoded = this.verifyRefreshTokenJwt(refreshTokenStr);
 
     const savedToken = await this.refreshTokenRepository.findOne({

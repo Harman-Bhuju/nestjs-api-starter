@@ -6,7 +6,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { Role } from 'src/modules/auth/entities/role.entity';
 import { Authorization } from 'src/modules/auth/entities/authorization.entity';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { File } from 'src/modules/fileupload/entities/file.entity';
+import { File } from 'src/modules/file/entities/file.entity';
 
 function resolveDatabaseRoot(): string {
   return process.env.NODE_ENV === 'production' ? 'dist' : 'src';

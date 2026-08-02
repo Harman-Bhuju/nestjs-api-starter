@@ -18,14 +18,14 @@ import type { Multer } from 'multer';
 
 import type { AuthRequest } from 'src/common/interfaces/auth-request.interface';
 
-import { FileuploadService } from '../service/fileupload.service';
+import { FileService } from '../service/file.service';
 import { multerOptions } from 'src/config/configuration/multer.config';
 
 @ApiTags('Files')
 @ApiBearerAuth('access-token')
 @Controller('files')
-export class FileuploadController {
-  constructor(private readonly fileuploadService: FileuploadService) {}
+export class FileController {
+  constructor(private readonly fileService: FileService) {}
 
   @ApiOperation({
     summary: "Upload or replace the current user's profile picture.",
@@ -43,12 +43,12 @@ export class FileuploadController {
     @UploadedFile() file: Multer.File,
     @Req() req: AuthRequest,
   ) {
-    return this.fileuploadService.uploadProfilePicture(req.user.sub, file);
+    return this.fileService.uploadProfilePicture(req.user.sub, file);
   }
 
   @ApiOperation({ summary: "Remove the current user's profile picture." })
   @Delete('profile')
   async deleteProfilePicture(@Req() req: AuthRequest) {
-    return this.fileuploadService.deleteProfilePicture(req.user.sub);
+    return this.fileService.deleteProfilePicture(req.user.sub);
   }
 }

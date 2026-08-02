@@ -5,7 +5,6 @@ import {
   Param,
   Patch,
   Query,
-  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,

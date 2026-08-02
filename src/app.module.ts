@@ -12,7 +12,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EmailModule } from './modules/email/email.module';
-import { FileuploadModule } from './modules/fileupload/fileupload.module';
+import { FileModule } from './modules/file/file.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AccessTokenGuard } from './modules/auth/guards/access-token.guard';
 import { AuthorizationGuard } from './modules/auth/guards/authorization.guard';
@@ -49,7 +49,7 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     UserModule,
     EmailModule,
-    FileuploadModule,
+    FileModule,
   ],
   providers: [
     AppService,

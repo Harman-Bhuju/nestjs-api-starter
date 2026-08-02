@@ -10,7 +10,7 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 
 import { Public } from 'src/common/decorators/public.decorator';
-import type { RefreshAuthRequest } from 'src/common/interfaces/refresh-auth-request.interface';
+import type { RefreshAuthRequest } from 'src/modules/auth/interfaces/refresh-auth-request.interface';
 
 import { AuthService } from '../service/auth.service';
 import { TokenService } from '../service/token.service';

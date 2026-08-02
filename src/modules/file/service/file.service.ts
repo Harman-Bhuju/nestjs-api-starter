@@ -22,7 +22,7 @@ import { User } from 'src/modules/user/entities/user.entity';
  * Don't grow this class with per-type branches — split into its own service once you have a second real type with different rules.
  */
 @Injectable()
-export class FileuploadService {
+export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
@@ -40,7 +40,7 @@ export class FileuploadService {
   };
 
   private resolveMetaType(file: Multer.File): FileMetaType {
-    const metaType = FileuploadService.ALLOWED_MIME_TYPES[file.mimetype];
+    const metaType = FileService.ALLOWED_MIME_TYPES[file.mimetype];
 
     if (!metaType) {
       throw new BadRequestException(

@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AccessTokenPayload } from '../interfaces/access-token-payload.interface';
+import { AccessTokenPayload } from '../../modules/auth/interfaces/access-token-payload.interface';
 /**
  * Returns the authenticated user's decoded access-token payload.
  * Usage: getMe(@CurrentUser() user: AccessTokenPayload)
