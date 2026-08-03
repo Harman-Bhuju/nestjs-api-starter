@@ -180,13 +180,12 @@ export class TokenService {
         nodeEnv === 'development'
           ? req.secure
           : this.configService.get<boolean>('COOKIE_SECURE', false),
-      sameSite: nodeEnv === 'production' ? 'strict' : 'lax',
+      sameSite: nodeEnv === 'production' ? 'strict' : 'none',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     };
   }
 
   setRefreshCookie(req: Request, res: Response, refreshToken: string): void {
-    if (req.headers['x-client-type'] !== 'web') return;
     res.cookie('refreshToken', refreshToken, this.cookieOptions(req));
   }
 

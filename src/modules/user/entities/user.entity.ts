@@ -35,7 +35,8 @@ export class User extends BaseEntity {
 
   // Never selected by default in queries that return user data to clients —
   // always strip it manually before sending a response (see UserService).
-  @Column()
+  // With select: false, TypeORM won't fetch it by default.
+  @Column({ select: false })
   password!: string;
 
   @Column({ type: 'enum', enum: Role, default: Role.USER })
