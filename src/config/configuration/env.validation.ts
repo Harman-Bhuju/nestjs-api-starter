@@ -35,7 +35,7 @@ export const envValidationSchema = Joi.object({
   // ── Email (Resend) ──
   RESEND_API_KEY: Joi.string().required(),
   RESEND_FROM_EMAIL: Joi.string().email({ tlds: false }).required(),
-  APP_NAME: Joi.string().default('NextStep'),
+  APP_NAME: Joi.string().default('NestJs Starter Api'),
   APP_URL: Joi.string().uri().required(),
 
   // ── File upload (Cloudinary) ──

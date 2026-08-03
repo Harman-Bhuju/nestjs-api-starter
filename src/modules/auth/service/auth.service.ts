@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,8 +14,9 @@ import { Repository } from 'typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
 import { StringUtils } from 'src/common/utils/string.utils';
 import { OtpUtils } from 'src/common/utils/otp.utils';
-import { Role } from 'src/common/enums/role.enum';
+import { Role as RoleEnum } from 'src/common/enums/role.enum';
 import { EmailService } from 'src/modules/email/service/email.service';
+import { UserResponseDto } from 'src/modules/user/dto/user-response.dto';
 
 import { RegisterUserDto } from '../dto/register-user.dto';
 import { LoginDto } from '../dto/login.dto';
@@ -23,6 +25,7 @@ import { ResendOtpDto } from '../dto/resend-otp.dto';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import { TokenService } from './token.service';
 import { TokenPair } from '../interfaces/token-pair.interface';
+import { Role } from '../entities/role.entity';
 
 const OTP_EXPIRED_MESSAGE = 'OTP has expired. Please request a new one.';
 const MAX_ATTEMPTS_MESSAGE = `Maximum OTP attempts exceeded. Account locked for ${OtpUtils.LOCK_DURATION_MINUTES} minutes.`;
@@ -37,13 +40,15 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
     private readonly configService: ConfigService,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
   ) {}
 
   private get saltRounds(): number {
-    return this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    return Number(this.configService.get('BCRYPT_SALT_ROUNDS') ?? 10);
   }
 
   async register(
@@ -56,7 +61,21 @@ export class AuthService {
       throw new ConflictException(`Email ${dto.email} is already registered`);
     }
 
+    // Every self-registered user gets the baseline USER role. This row must
+    // already exist — it's created by the role/authorization seed script
+    // (src/scripts/create-routes.ts), which should run once per environment
+    // before the API accepts traffic.
+    const defaultRole = await this.roleRepository.findOne({
+      where: { role: RoleEnum.USER },
+    });
+    if (!defaultRole) {
+      throw new InternalServerErrorException(
+        `Default role '${RoleEnum.USER}' is not seeded. Run the role seed script first.`,
+      );
+    }
+
     const otp = OtpUtils.generateOtp();
+
     const hashedPassword = await bcrypt.hash(dto.password, this.saltRounds);
 
     // Transaction so "create user" and "send OTP email" succeed or fail
@@ -73,7 +92,8 @@ export class AuthService {
         lastName: dto.lastName,
         email: dto.email,
         password: hashedPassword,
-        role: Role.USER,
+        role: defaultRole,
+        gender: dto.gender ?? null,
         contactNumber: dto.contactNumber ?? null,
         address: dto.address ?? null,
         province: dto.province ?? null,
@@ -90,11 +110,17 @@ export class AuthService {
       // Throws (generic message, real cause logged inside EmailService) if
       // delivery fails — that exception propagates out of this callback,
       // which makes TypeORM roll back the insert above automatically.
-      await this.emailService.sendVerificationOtp(
-        saved.email,
-        saved.firstName,
-        otp,
-      );
+      try {
+        await this.emailService.sendVerificationOtp(
+          saved.email,
+          saved.firstName,
+          otp,
+        );
+      } catch {
+        throw new InternalServerErrorException(
+          "Registration could not be completed because we couldn't send the verification email. Please try again.",
+        );
+      }
 
       return {
         message: `Registration successful! OTP sent to ${dto.email}. Valid for ${OtpUtils.OTP_VALIDITY_MINUTES} minutes.`,
@@ -146,20 +172,25 @@ export class AuthService {
         ...(isRegistrationFlow ? {} : { isPasswordResetVerified: false }),
       });
 
-      if (isRegistrationFlow) {
-        await this.emailService.sendVerificationOtp(
-          user.email,
-          user.firstName,
-          otp,
-        );
-      } else {
-        await this.emailService.sendPasswordResetOtp(
-          user.email,
-          user.firstName,
-          otp,
+      try {
+        if (isRegistrationFlow) {
+          await this.emailService.sendVerificationOtp(
+            user.email,
+            user.firstName,
+            otp,
+          );
+        } else {
+          await this.emailService.sendPasswordResetOtp(
+            user.email,
+            user.firstName,
+            otp,
+          );
+        }
+      } catch {
+        throw new InternalServerErrorException(
+          'We could not send the OTP at this time. Please try again.',
         );
       }
-
       return { message: genericMessage };
     });
   }
@@ -167,12 +198,13 @@ export class AuthService {
   async verifyOtp(dto: OtpVerifyDto) {
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
+      relations: { role: true },
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        role: true,
+        role: { id: true, role: true },
         isEmailVerified: true,
         isPasswordResetVerified: true,
         otpCode: true,
@@ -228,7 +260,7 @@ export class AuthService {
         message: 'Email verified successfully',
         email: user.email,
         name: `${user.firstName} ${user.lastName}`,
-        role: user.role,
+        role: user.role.role,
         userId: user.id,
       };
     }
@@ -273,17 +305,11 @@ export class AuthService {
   async login(dto: LoginDto): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: Omit<
-      User,
-      | 'password'
-      | 'otpCode'
-      | 'otpExpiryTime'
-      | 'otpAttempts'
-      | 'otpLockedUntil'
-    >;
+    user: UserResponseDto;
   }> {
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
+      relations: { role: true, profileImage: true },
       select: {
         id: true,
         firstName: true,
@@ -291,7 +317,13 @@ export class AuthService {
         lastName: true,
         email: true,
         password: true,
-        role: true,
+        roleId: true,
+        role: { id: true, role: true },
+        gender: true,
+        contactNumber: true,
+        address: true,
+        province: true,
+        district: true,
         tokenVersion: true,
         isEmailVerified: true,
         otpLockedUntil: true,
@@ -318,9 +350,12 @@ export class AuthService {
 
     const { accessToken, refreshToken } =
       await this.tokenService.issueTokens(user);
-    const { password: _password, ...safeUser } = user;
 
-    return { accessToken, refreshToken, user: safeUser as any };
+    return {
+      accessToken,
+      refreshToken,
+      user: UserResponseDto.fromEntity(user),
+    };
   }
 
   async refreshAccessToken(refreshToken: string): Promise<TokenPair> {

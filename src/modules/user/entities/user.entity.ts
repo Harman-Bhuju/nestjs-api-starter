@@ -1,8 +1,9 @@
-import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { Role } from 'src/common/enums/role.enum';
+import { Gender } from 'src/common/enums/gender.enum';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { File } from 'src/modules/file/entities/file.entity';
+import { Role } from 'src/modules/auth/entities/role.entity';
 
 /**
  * Generic user. Keep this the single source of truth for "who can log in".
@@ -10,7 +11,7 @@ import { File } from 'src/modules/file/entities/file.entity';
  * separate entity with a OneToOne back to User rather than bloating this
  * table — see the commented example at the bottom of this file.
  */
-@Index('idx_user_role', ['role'])
+@Index('idx_user_role', ['roleId'])
 @Entity('user')
 export class User extends BaseEntity {
   @Column()
@@ -39,7 +40,17 @@ export class User extends BaseEntity {
   @Column({ select: false })
   password!: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  // Plain FK column, declared alongside the `role` relation below so callers
+  // that only need the id (e.g. building a JWT payload) don't have to load
+  // the full Role relation. Both map to the same physical "roleId" column —
+  // TypeORM keeps them in sync on save (see Role entity / migration
+  // 1738000100000-AddRoleIdToUser for the historical `role` enum column this
+  // replaced).
+  @Column()
+  roleId!: string;
+
+  @ManyToOne(() => Role, { eager: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'roleId' })
   role!: Role;
 
   @Column({ type: 'varchar', nullable: true })
@@ -53,6 +64,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   district!: string | null;
+
+  // Optional — collected at registration or via profile update, never required.
+  @Column({ type: 'enum', enum: Gender, nullable: true })
+  gender!: Gender | null;
 
   @Column({ type: 'varchar', length: 6, nullable: true, select: false })
   otpCode!: string | null;

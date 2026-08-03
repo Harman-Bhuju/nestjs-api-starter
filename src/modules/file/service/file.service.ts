@@ -14,6 +14,7 @@ import { FileMetaType } from 'src/common/enums/file-metatype.enum';
 
 import { CloudinaryService } from './cloudinary.service';
 import { User } from 'src/modules/user/entities/user.entity';
+import { FileResponseDto } from '../dto/file-response.dto';
 
 /**
  * Only handles profile pictures right now — by design, a user must already
@@ -51,7 +52,10 @@ export class FileService {
     return metaType;
   }
 
-  async uploadProfilePicture(userId: string, file: Multer.File): Promise<File> {
+  async uploadProfilePicture(
+    userId: string,
+    file: Multer.File,
+  ): Promise<FileResponseDto> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -76,7 +80,8 @@ export class FileService {
       existing.fileUrl = url;
       existing.publicId = publicId;
       existing.metaType = metaType;
-      return this.fileRepository.save(existing);
+      const saved = await this.fileRepository.save(existing);
+      return FileResponseDto.fromEntity(saved);
     }
 
     const created = this.fileRepository.create({
@@ -87,7 +92,8 @@ export class FileService {
       metaType,
       profileUser: user,
     });
-    return this.fileRepository.save(created);
+    const saved = await this.fileRepository.save(created);
+    return FileResponseDto.fromEntity(saved);
   }
 
   async deleteProfilePicture(userId: string): Promise<{ message: string }> {

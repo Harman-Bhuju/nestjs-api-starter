@@ -19,6 +19,8 @@
     "migration:show": "node -r ts-node/register -r tsconfig-paths/register node_modules/typeorm/cli.js migration:show -d src/data-source.ts",
     "migration:run:prod": "node -r tsconfig-paths/register node_modules/typeorm/cli.js migration:run -d dist/data-source.js",
     "migration:revert:prod": "node -r tsconfig-paths/register node_modules/typeorm/cli.js migration:revert -d dist/data-source.js",
+    "seed:routes": "node -r ts-node/register -r tsconfig-paths/register src/scripts/create-routes.ts",
+    "seed:routes:prod": "node dist/scripts/create-routes.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

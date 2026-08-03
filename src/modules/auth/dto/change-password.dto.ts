@@ -8,12 +8,20 @@ import {
 } from 'class-validator';
 
 export class ChangePasswordDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: 'jane@example.com',
+    description:
+      'Must be an account that has already completed POST /auth/verify-otp for the forgot-password flow',
+  })
   @IsEmail()
   @IsNotEmpty()
   email!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'NewSecurePassword456!',
+    description:
+      'At least 8 characters, at most 30, with at least one uppercase letter, one lowercase letter, and one number.',
+  })
   @IsString()
   @Length(8, 30)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
@@ -22,7 +30,10 @@ export class ChangePasswordDto {
   })
   password!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'NewSecurePassword456!',
+    description: 'Must exactly match `password`',
+  })
   @IsString()
   @IsNotEmpty()
   confirmPassword!: string;

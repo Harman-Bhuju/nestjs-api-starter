@@ -34,7 +34,8 @@ export class TokenService {
     return {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      roleId: user.roleId,
+      role: user.role.role,
       tokenVersion: user.tokenVersion,
     };
   }
@@ -82,7 +83,7 @@ export class TokenService {
 
     const hashToken = await bcrypt.hash(
       refreshToken,
-      this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10),
+      Number(this.configService.get('BCRYPT_SALT_ROUNDS') ?? 10),
     );
 
     await this.refreshTokenRepository.save(
@@ -104,8 +105,10 @@ export class TokenService {
 
     const savedToken = await this.refreshTokenRepository.findOne({
       where: { id: decoded.jti },
+      // .role is loaded here (not just the FK) because buildPayload() needs
+      // the human-readable role name (user.role.role) to reissue tokens.
       relations: {
-        user: true,
+        user: { role: true },
       },
     });
 

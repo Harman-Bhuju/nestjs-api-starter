@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Authorization } from '../entities/authorization.entity';
-import { Role } from '../entities/role.entity';
 
+/**
+ * Takes roleId straight from the (already-verified) JWT payload — no Role
+ * lookup happens here or in AuthorizationGuard anymore. The JWT is the
+ * source of truth for "which role is this request acting as"; this service
+ * only answers "what is that roleId allowed to do".
+ */
 @Injectable()
 export class AuthorizationService {
-  // roleId -> cached permission rows (short TTL; avoids a DB hit on every request)
+  // roleId -> cached permission rows
   private readonly authCache = new Map<
     string,
     { data: Authorization[]; expiry: number }
@@ -20,11 +25,11 @@ export class AuthorizationService {
   ) {}
 
   async isAuthorized(
-    role: Role,
+    roleId: string,
     path: string,
     method: string,
   ): Promise<boolean> {
-    const authorizations = await this.getAuthorizationsForRole(role);
+    const authorizations = await this.getAuthorizationsForRole(roleId);
 
     return authorizations.some((auth) => {
       const pathMatches = this.getCompiledRegex(auth.path).test(path);
@@ -39,14 +44,16 @@ export class AuthorizationService {
     else this.authCache.clear();
   }
 
-  private async getAuthorizationsForRole(role: Role): Promise<Authorization[]> {
-    const cached = this.authCache.get(role.id);
+  private async getAuthorizationsForRole(
+    roleId: string,
+  ): Promise<Authorization[]> {
+    const cached = this.authCache.get(roleId);
     if (cached && Date.now() < cached.expiry) {
       return cached.data;
     }
 
     const authorizations = await this.authorizationRepository.find({
-      where: { role: { id: role.id } },
+      where: { role: { id: roleId } },
       select: {
         id: true,
         path: true,
@@ -54,7 +61,7 @@ export class AuthorizationService {
       },
     });
 
-    this.authCache.set(role.id, {
+    this.authCache.set(roleId, {
       data: authorizations,
       expiry: Date.now() + this.CACHE_TTL_MS,
     });

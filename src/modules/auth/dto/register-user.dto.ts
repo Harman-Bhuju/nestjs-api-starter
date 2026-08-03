@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -9,6 +10,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeText } from 'src/common/transformers/normalize-text.transformer';
+import { Gender } from 'src/common/enums/gender.enum';
 
 export class RegisterUserDto {
   @ApiProperty({ example: 'Jane' })
@@ -18,7 +20,7 @@ export class RegisterUserDto {
   @IsNotEmpty()
   firstName!: string;
 
-  @ApiProperty({ example: 'Marie', required: false })
+  @ApiProperty({ example: 'Marie', required: false, nullable: true })
   @Transform(normalizeText)
   @Length(1, 50)
   @IsOptional()
@@ -40,7 +42,11 @@ export class RegisterUserDto {
   @IsNotEmpty()
   email!: string;
 
-  @ApiProperty({ example: 'SecurePassword123!' })
+  @ApiProperty({
+    example: 'SecurePassword123!',
+    description:
+      'At least 8 characters, at most 30, with at least one uppercase letter, one lowercase letter, and one number.',
+  })
   @IsString()
   @Length(8, 30)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
@@ -53,6 +59,16 @@ export class RegisterUserDto {
   // Optional address fields — collected at registration but never
   // required, since plenty of valid signups won't have them yet.
   // ════════════════════════════════════════════
+
+  @ApiProperty({
+    enum: Gender,
+    required: false,
+    description: 'Self-reported gender',
+    example: Gender.FEMALE,
+  })
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
 
   @ApiProperty({ example: '9800000000', required: false })
   @IsOptional()

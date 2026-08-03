@@ -4,14 +4,21 @@ import { FindOptionsSelect, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateProfileDto } from '../dto/update-profile.dto';
 import { QueryUserDto } from '../dto/query-user.dto';
+import { UserResponseDto } from '../dto/user-response.dto';
+import { UserListResponseDto } from '../dto/user-list-response.dto';
 
+// `role` is nested here (rather than `role: true`) because it's now a
+// relation (see User.role) — this selects only role.id/role.role off the
+// joined row instead of pulling the whole Role entity.
 const SAFE_USER_SELECT: FindOptionsSelect<User> = {
   id: true,
   firstName: true,
   middleName: true,
   lastName: true,
   email: true,
-  role: true,
+  roleId: true,
+  role: { id: true, role: true },
+  gender: true,
   contactNumber: true,
   address: true,
   province: true,
@@ -21,13 +28,17 @@ const SAFE_USER_SELECT: FindOptionsSelect<User> = {
   updatedAt: true,
 };
 
+// Plain-column projection for the QueryBuilder-based list() below. `role` is
+// deliberately absent — it's joined and selected separately since it's a
+// relation, not a column on `user`.
 const SAFE_USER_COLUMNS = [
   'id',
   'firstName',
   'middleName',
   'lastName',
   'email',
-  'role',
+  'roleId',
+  'gender',
   'contactNumber',
   'address',
   'province',
@@ -44,23 +55,27 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getById(id: string): Promise<Partial<User>> {
+  async getById(id: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({
       where: { id },
       select: SAFE_USER_SELECT,
       relations: {
+        role: true,
         profileImage: true,
       },
     });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    return UserResponseDto.fromEntity(user);
   }
 
   async updateProfile(
     userId: string,
     dto: UpdateProfileDto,
-  ): Promise<Partial<User>> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  ): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: { role: true, profileImage: true },
+    });
     if (!user) throw new NotFoundException('User not found');
 
     if (dto.firstName !== undefined) user.firstName = dto.firstName;
@@ -70,10 +85,10 @@ export class UserService {
     if (dto.province !== undefined) user.province = dto.province;
     if (dto.district !== undefined) user.district = dto.district;
     if (dto.contactNumber !== undefined) user.contactNumber = dto.contactNumber;
+    if (dto.gender !== undefined) user.gender = dto.gender;
 
     const saved = await this.userRepository.save(user);
-    const { password: _password, otpCode: _otp, ...safeUser } = saved;
-    return safeUser;
+    return UserResponseDto.fromEntity(saved);
   }
 
   /**
@@ -85,20 +100,31 @@ export class UserService {
    * - Selects only safe, non-sensitive user fields.
    * - Orders by createdAt and id to ensure stable pagination.
    */
-  async list(query: QueryUserDto) {
+  async list(query: QueryUserDto): Promise<UserListResponseDto> {
     // Validate and cap the requested page size (default: 10, max: 100)
     const limit = query.limit
       ? Math.min(parseInt(query.limit, 10) || 10, 100)
       : 10;
 
-    // Build the base query and select only safe user fields.
+    // Build the base query and select only safe user fields, joining `role`
+    // (needed both to filter by role name and to render it in the response)
+    // and `profileImage` (so profileImageUrl is populated consistently with
+    // getById()).
     const qb = this.userRepository
       .createQueryBuilder('user')
-      .select(SAFE_USER_COLUMNS.map((f) => `user.${f}`));
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.profileImage', 'profileImage')
+      .select([
+        ...SAFE_USER_COLUMNS.map((f) => `user.${f}`),
+        'role.id',
+        'role.role',
+        'profileImage.fileUrl',
+      ]);
 
-    // Filter users by role if provided.
+    // Filter users by role name if provided (joins through to the role table
+    // since `role` now lives there instead of being a plain enum column).
     if (query.role) {
-      qb.andWhere('user.role = :role', { role: query.role });
+      qb.andWhere('role.role = :role', { role: query.role });
     }
 
     // Search by first or last name (case-insensitive).
@@ -151,7 +177,7 @@ export class UserService {
     }
 
     return {
-      data: users,
+      data: users.map((user) => UserResponseDto.fromEntity(user)),
       pagination: {
         limit,
         // Cursor for the next request.

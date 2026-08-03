@@ -4,31 +4,28 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 import { Role as RoleEnum } from '../../src/common/enums/role.enum';
-import { StringUtils } from '../../src/common/utils/string.utils';
-import { User } from '../../src/modules/user/entities/user.entity';
 import { Role } from '../../src/modules/auth/entities/role.entity';
 import { Authorization } from '../../src/modules/auth/entities/authorization.entity';
-import { RefreshToken } from '../../src/modules/auth/entities/refresh-token.entity';
+import { buildDataSourceOptions } from '../config/database/typeorm-options';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const FULL_ACCESS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-const READ_ONLY = ['GET'];
+const GET = 'GET';
+const POST = 'POST';
+const PUT = 'PUT';
+const PATCH = 'PATCH';
+const DELETE = 'DELETE';
+const FULL_ACCESS = [GET, POST, PUT, PATCH, DELETE];
 
-const AppDataSource = new DataSource({
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-  entities: [User, Role, Authorization, RefreshToken],
-  synchronize: false,
-  logging: false,
-});
+// Reuses the same DataSourceOptions the app and `npm run migration:*`
+// commands use (see src/data-source.ts) instead of hand-rolling a second,
+// easily-drifting copy of the connection config here.
+const AppDataSource = new DataSource(buildDataSourceOptions());
 
-async function upsertRole(dataSource: DataSource, roleName: RoleEnum): Promise<Role> {
+async function upsertRole(
+  dataSource: DataSource,
+  roleName: RoleEnum,
+): Promise<Role> {
   const repo = dataSource.getRepository(Role);
   let role = await repo.findOne({ where: { role: roleName } });
   if (!role) {
@@ -41,7 +38,11 @@ async function upsertRole(dataSource: DataSource, roleName: RoleEnum): Promise<R
   return role;
 }
 
-function permission(role: Role, path: string, methods: string[]): Authorization {
+function permission(
+  role: Role,
+  path: string,
+  methods: string[],
+): Authorization {
   const auth = new Authorization();
   auth.id = Authorization.generateId(4);
   auth.role = role;
@@ -64,6 +65,7 @@ function getAdminPermissions(role: Role): Authorization[] {
 
 function getUserPermissions(role: Role): Authorization[] {
   return [
+    permission(role, '/auth/logout-all-devices', [POST]),
     permission(role, '/users/me', FULL_ACCESS),
     permission(role, '/files/profile', FULL_ACCESS),
     permission(role, '/files/documents', FULL_ACCESS),
@@ -74,7 +76,9 @@ function getUserPermissions(role: Role): Authorization[] {
 async function seed() {
   try {
     await AppDataSource.initialize();
-    console.log('Data source initialized. Run migrations before seeding if you haven\'t.');
+    console.log(
+      "Data source initialized. Run migrations before seeding if you haven't.",
+    );
 
     const adminRole = await upsertRole(AppDataSource, RoleEnum.ADMIN);
     const userRole = await upsertRole(AppDataSource, RoleEnum.USER);

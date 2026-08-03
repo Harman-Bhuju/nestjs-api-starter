@@ -23,7 +23,7 @@ export class EmailService {
     // One brand name everywhere — the original mixed "Location Track" and
     // "NextStep Inventory" across different emails, which looks like a bug
     // (and is confusing) to anyone who receives both.
-    this.appName = this.configService.get<string>('APP_NAME', 'Nestjs-Api');
+    this.appName = this.configService.get<string>('APP_NAME', 'NestJS Basic Auth');
   }
 
   async sendVerificationOtp(
@@ -48,7 +48,6 @@ export class EmailService {
       'Verify Your Email - Your OTP Code',
       html,
       'verification OTP',
-      "We couldn't send your verification email. Please try again.",
     );
   }
 
@@ -75,7 +74,6 @@ export class EmailService {
       'Your Password Reset OTP',
       html,
       'password reset OTP',
-      "We couldn't send your password reset email. Please try again.",
     );
   }
 
@@ -95,7 +93,6 @@ export class EmailService {
     subject: string,
     html: string,
     label: string,
-    userFacingMessage: string,
   ): Promise<void> {
     try {
       const { error } = await this.resend.emails.send({
@@ -107,14 +104,14 @@ export class EmailService {
 
       if (error) {
         this.logger.error(`Failed to send ${label} to ${to}: ${error.message}`);
-        throw new InternalServerErrorException(userFacingMessage);
+        throw new InternalServerErrorException('Failed to send email.');
       }
 
       this.logger.log(`Sent ${label} to ${to}`);
     } catch (err) {
       if (err instanceof InternalServerErrorException) throw err;
       this.logger.error(`Exception sending ${label} to ${to}`, err as Error);
-      throw new InternalServerErrorException(userFacingMessage);
+      throw new InternalServerErrorException('Failed to send email.');
     }
   }
 }

@@ -1,9 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ example: 'jane@example.com' })
+  @ApiProperty({
+    example: 'jane@example.com',
+    description: 'Must belong to an already-verified account',
+  })
   @Transform(({ value }) =>
     typeof value === 'string' ? value.trim().toLowerCase() : value,
   )
@@ -11,12 +14,16 @@ export class LoginDto {
   @IsNotEmpty()
   email!: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'SecurePassword123!' })
   @IsString()
   @IsNotEmpty()
   password!: string;
 
-  @ApiProperty({ required: false, description: 'Push notification token' })
+  @ApiPropertyOptional({
+    description:
+      'Push notification token for this device. Optional — omit if the client does not support push notifications.',
+    example: 'fcm-token-example-abc123',
+  })
   @IsOptional()
   @IsString()
   fcmToken?: string | null;
