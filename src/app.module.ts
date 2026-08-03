@@ -43,13 +43,13 @@ import { APP_GUARD } from '@nestjs/core';
     // Sane global default; individual auth endpoints (login, OTP) set tighter
     // limits with @Throttle(...) since brute-force risk differs per route.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
-    MessagingModule,
-    PaymentModule,
-    SubscriptionsModule,
     AuthModule,
     UserModule,
     EmailModule,
     FileModule,
+    MessagingModule,
+    SubscriptionsModule,
+    PaymentModule,
   ],
   providers: [
     AppService,
