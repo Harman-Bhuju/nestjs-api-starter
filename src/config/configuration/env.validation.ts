@@ -50,7 +50,7 @@ export const envValidationSchema = Joi.object({
   // validation; safe to delete from your .env.
   ENABLE_MULTIPART: Joi.boolean().default(true),
 
-   // ── Payments (eSewa) ──
+  // ── Payments (eSewa) ──
   ESEWA_PRODUCT_CODE: Joi.string().required(),
   ESEWA_SECRET_KEY: Joi.string().required(),
   ESEWA_PAYMENT_URL: Joi.string().uri().required(),
@@ -58,4 +58,12 @@ export const envValidationSchema = Joi.object({
   ESEWA_SUCCESS_URL: Joi.string().uri().required(),
   ESEWA_FAILURE_URL: Joi.string().uri().required(),
   FRONTEND_URL: Joi.string().uri().required(),
+
+  // Ai chat-bot
+  AI_BASE_URL: Joi.string().uri().required(),
+  AI_MODEL: Joi.string().required(),
+  AI_API_KEY: Joi.string().allow('').optional(),
+  AI_TIMEOUT: Joi.number().default(30000),
+  AI_MAX_TOKENS: Joi.number().default(512),
+  AI_TEMPERATURE: Joi.number().min(0).max(2).default(0.3),
 });

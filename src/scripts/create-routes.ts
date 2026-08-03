@@ -79,6 +79,8 @@ function getUserPermissions(role: Role): Authorization[] {
     permission(role, '/subscriptions/me/current-tier', [GET]),
     permission(role, '/payment', [POST]),
     permission(role, '/payment/status/:transactionUuid', [GET]),
+
+    permission(role, '/chat-bot/chat', [POST]),
   ];
 }
 

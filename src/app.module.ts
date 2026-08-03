@@ -17,6 +17,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AccessTokenGuard } from './modules/auth/guards/access-token.guard';
 import { AuthorizationGuard } from './modules/auth/guards/authorization.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { ChatBotModule } from './modules/chat-bot/chat-bot.module';
 
 @Module({
   imports: [
@@ -42,7 +43,7 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     // Sane global default; individual auth endpoints (login, OTP) set tighter
     // limits with @Throttle(...) since brute-force risk differs per route.
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 80 }]),
     AuthModule,
     UserModule,
     EmailModule,
@@ -50,6 +51,7 @@ import { APP_GUARD } from '@nestjs/core';
     MessagingModule,
     SubscriptionsModule,
     PaymentModule,
+    ChatBotModule,
   ],
   providers: [
     AppService,
