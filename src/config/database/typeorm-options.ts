@@ -8,9 +8,9 @@ import { Authorization } from 'src/modules/auth/entities/authorization.entity';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { File } from 'src/modules/file/entities/file.entity';
 import { Invoice } from 'src/modules/subscriptions/entities/invoice.entity';
-import { Subscription } from 'rxjs';
 import { Plan } from 'src/modules/subscriptions/entities/plan.entity';
 import { Payment } from 'src/modules/payment/entities/payment.entity';
+import { Subscription } from 'src/modules/subscriptions/entities/subscription.entity';
 
 function resolveDatabaseRoot(): string {
   return process.env.NODE_ENV === 'production' ? 'dist' : 'src';

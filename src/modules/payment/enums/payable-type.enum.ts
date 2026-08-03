@@ -1,6 +1,5 @@
-// payable-type.enum.ts
 export enum PayableType {
-  INVOICE = 'INVOICE',       // subscriptions — build now
-  ORDER = 'ORDER',           // product purchases — later
-  APPOINTMENT = 'APPOINTMENT', // later
+  INVOICE = 'INVOICE', // subscriptions — implemented
+  ORDER = 'ORDER', // product purchases — not yet implemented
+  APPOINTMENT = 'APPOINTMENT', // appointments — not yet implemented
 }

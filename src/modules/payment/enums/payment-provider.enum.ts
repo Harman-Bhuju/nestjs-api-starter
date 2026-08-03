@@ -1,3 +1,3 @@
 export enum PaymentProvider {
-  ESEWA = 'ESEWA'
+  ESEWA = 'ESEWA',
 }

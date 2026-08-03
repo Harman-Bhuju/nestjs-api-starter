@@ -1,4 +1,4 @@
-import { PaymentStatus } from "../enums/payment-status.enum";
+import { PaymentStatus } from '../enums/payment-status.enum';
 
 export interface EsewaVerifiedResponse {
   transaction_code: string;
@@ -10,10 +10,9 @@ export interface EsewaVerifiedResponse {
   signature: string;
 }
 
-
 // {
 //   "transaction_code": "000AWEO",
-  
+
 //   "status": "COMPLETE",
 
 //   "total_amount": 1000.0,
@@ -25,4 +24,4 @@ export interface EsewaVerifiedResponse {
 //   "signed_field_names": "transaction_code, status, total_amount, transaction_uuid, product_code, signed_field_names",
 
 //   "signature": "62GcfZTmVkzhtUeh+QJ1AqiJrjoWWGof3U+eTPTZ7fA="
-// } 
+// }
