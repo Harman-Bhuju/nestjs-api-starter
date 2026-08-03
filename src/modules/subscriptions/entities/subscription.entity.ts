@@ -1,28 +1,43 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
-  ManyToOne, JoinColumn, OneToMany,
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
 } from 'typeorm';
+import { BaseEntity } from 'src/common/entities/base.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 import { SubscriptionStatus } from '../enums/subscription-status.enum';
 import { Plan } from './plan.entity';
 import { Invoice } from './invoice.entity';
 
-@Entity('subscriptions')
-export class Subscription {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
-  // once you have a User entity, make this a real relation (@ManyToOne(() => User))
-  @Column({ type: 'uuid' })
+@Index('idx_subscription_user', ['userId'])
+@Index('idx_subscription_status_period', ['status', 'currentPeriodEnd'])
+@Entity('subscription')
+export class Subscription extends BaseEntity {
+  // Plain FK column, declared alongside the `user` relation below — same
+  // dual-column pattern as User.roleId/role — so callers that only need the
+  // id (e.g. ownership checks) don't have to load the full User relation.
+  @Column()
   userId!: string;
 
-  @ManyToOne(() => Plan)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user!: User;
+
+  @Column()
+  planId!: string;
+
+  @ManyToOne(() => Plan, { eager: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'planId' })
   plan!: Plan;
 
-  @Column({ type: 'uuid' })
-  planId!: string;
-
-  @Column({ type: 'enum', enum: SubscriptionStatus, default: SubscriptionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.PENDING,
+  })
   status!: SubscriptionStatus;
 
   // nullable — not "real" until payment confirms and activateFromInvoice() sets them
@@ -34,10 +49,4 @@ export class Subscription {
 
   @OneToMany(() => Invoice, (invoice) => invoice.subscription)
   invoices!: Invoice[];
-
-  @CreateDateColumn()
-  createdAt!: Date;
-
-  @UpdateDateColumn()
-  updatedAt!: Date;
 }

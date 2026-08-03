@@ -42,10 +42,6 @@ export class User extends BaseEntity {
 
   // Plain FK column, declared alongside the `role` relation below so callers
   // that only need the id (e.g. building a JWT payload) don't have to load
-  // the full Role relation. Both map to the same physical "roleId" column —
-  // TypeORM keeps them in sync on save (see Role entity / migration
-  // 1738000100000-AddRoleIdToUser for the historical `role` enum column this
-  // replaced).
   @Column()
   roleId!: string;
 

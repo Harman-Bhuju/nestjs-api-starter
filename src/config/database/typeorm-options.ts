@@ -7,12 +7,26 @@ import { Role } from 'src/modules/auth/entities/role.entity';
 import { Authorization } from 'src/modules/auth/entities/authorization.entity';
 import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
 import { File } from 'src/modules/file/entities/file.entity';
+import { Invoice } from 'src/modules/subscriptions/entities/invoice.entity';
+import { Subscription } from 'rxjs';
+import { Plan } from 'src/modules/subscriptions/entities/plan.entity';
+import { Payment } from 'src/modules/payment/entities/payment.entity';
 
 function resolveDatabaseRoot(): string {
   return process.env.NODE_ENV === 'production' ? 'dist' : 'src';
 }
 
-const entities = [User, Role, Authorization, RefreshToken, File];
+const entities = [
+  User,
+  Role,
+  Authorization,
+  RefreshToken,
+  File,
+  Plan,
+  Subscription,
+  Invoice,
+  Payment,
+];
 
 function buildBaseTypeOrmOptions(): TypeOrmModuleOptions {
   const sslEnabled = process.env.DB_SSL === 'true';

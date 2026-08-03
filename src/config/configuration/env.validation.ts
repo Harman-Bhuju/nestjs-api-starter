@@ -49,4 +49,13 @@ export const envValidationSchema = Joi.object({
   // needed. Kept here only so an existing .env with this var doesn't fail
   // validation; safe to delete from your .env.
   ENABLE_MULTIPART: Joi.boolean().default(true),
+
+   // ── Payments (eSewa) ──
+  ESEWA_PRODUCT_CODE: Joi.string().required(),
+  ESEWA_SECRET_KEY: Joi.string().required(),
+  ESEWA_PAYMENT_URL: Joi.string().uri().required(),
+  ESEWA_STATUS_CHECK_URL: Joi.string().uri().required(),
+  ESEWA_SUCCESS_URL: Joi.string().uri().required(),
+  ESEWA_FAILURE_URL: Joi.string().uri().required(),
+  FRONTEND_URL: Joi.string().uri().required(),
 });

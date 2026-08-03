@@ -60,6 +60,10 @@ function getAdminPermissions(role: Role): Authorization[] {
     permission(role, '/users', FULL_ACCESS),
     permission(role, '/users/*', FULL_ACCESS),
     permission(role, '/files/*', FULL_ACCESS),
+
+    permission(role, '/subscriptions/plans', [POST]),
+    permission(role, '/subscriptions/*', FULL_ACCESS),
+    permission(role, '/payment/*', FULL_ACCESS),
   ];
 }
 
@@ -70,6 +74,12 @@ function getUserPermissions(role: Role): Authorization[] {
     permission(role, '/files/profile', FULL_ACCESS),
     permission(role, '/files/documents', FULL_ACCESS),
     permission(role, '/files/documents/:id', FULL_ACCESS),
+
+    permission(role, '/subscriptions/purchase', [POST]),
+    permission(role, '/subscriptions/me', [GET]),
+    permission(role, '/subscriptions/me/current-tier', [GET]),
+    permission(role, '/payment', [POST]),
+    permission(role, '/payment/status/:transactionUuid', [GET]),
   ];
 }
 

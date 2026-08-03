@@ -1,9 +1,13 @@
-import { IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
+// userId is deliberately NOT here — it's taken from the JWT (@CurrentUser('sub'))
+// so a caller can never purchase a subscription on behalf of another user.
 export class PurchaseSubscriptionDto {
-  @IsUUID()
-  userId!: string;
-
-  @IsUUID()
-  planId!: string; // must NOT be a FREE-tier plan — service rejects that
+  @ApiProperty({
+    description: 'id of a non-FREE Plan (see GET /subscriptions/plans)',
+    example: 'aB3dE9fG',
+  })
+  @IsString()
+  planId!: string;
 }

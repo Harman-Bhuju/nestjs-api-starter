@@ -56,10 +56,7 @@ export class ErrorResponseDto {
  * into every call site; it must match ErrorResponseDto's class name exactly
  * if that class is ever renamed.
  */
-export function errorExample(
-  statusCode: number,
-  message: string | string[],
-) {
+export function errorExample(statusCode: number, message: string | string[]) {
   return {
     schema: {
       allOf: [{ $ref: '#/components/schemas/ErrorResponseDto' }],
