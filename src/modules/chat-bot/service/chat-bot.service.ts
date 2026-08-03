@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { CHAT_BOT_SYSTEM_PROMPT } from '../constants/system-prompt';
+import { buildChatBotSystemPrompt } from '../constants/system-prompt';
 import { ChatResponseDto } from '../dto/chat-response.dto';
 import { ChatRequestDto } from '../dto/chat-request.dto';
+import { UserService } from '../../user/service/user.service';
 
 type OmniRouteRole = 'system' | 'user';
 
@@ -48,7 +49,10 @@ export class ChatBotService {
   private readonly maxTokens: number;
   private readonly temperature: number;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
     this.baseUrl = this.configService.getOrThrow<string>('AI_BASE_URL');
     this.model = this.configService.getOrThrow<string>('AI_MODEL');
     this.apiKey = this.configService.getOrThrow<string>('AI_API_KEY');
@@ -63,11 +67,15 @@ export class ChatBotService {
     );
   }
 
-  public async chat(chatRequestDto: ChatRequestDto): Promise<ChatResponseDto> {
+  public async chat(
+    chatRequestDto: ChatRequestDto,
+    userId: string,
+  ): Promise<ChatResponseDto> {
     const startedAt = Date.now();
     this.logger.log(`Incoming chat-bot request received | model=${this.model}`);
 
-    const messages = this.buildMessages(chatRequestDto.message);
+    const visitorName = await this.resolveVisitorName(userId);
+    const messages = this.buildMessages(chatRequestDto.message, visitorName);
 
     try {
       const rawResponse = await this.callOmniRoute(messages);
@@ -86,9 +94,31 @@ export class ChatBotService {
     }
   }
 
-  private buildMessages(userMessage: string): OmniRouteMessage[] {
+  /**
+   * Best-effort lookup of the visitor's first name so the bot can
+   * personalize replies. Never lets a lookup failure break the chat —
+   * falls back to an anonymous conversation instead.
+   */
+  private async resolveVisitorName(
+    userId: string,
+  ): Promise<string | undefined> {
+    try {
+      const user = await this.userService.getById(userId);
+      return user.firstName;
+    } catch (error) {
+      this.logger.warn(
+        `Could not resolve visitor name for personalization | reason=${this.describeError(error)}`,
+      );
+      return undefined;
+    }
+  }
+
+  private buildMessages(
+    userMessage: string,
+    visitorName?: string,
+  ): OmniRouteMessage[] {
     return [
-      { role: ROLE_SYSTEM, content: CHAT_BOT_SYSTEM_PROMPT },
+      { role: ROLE_SYSTEM, content: buildChatBotSystemPrompt(visitorName) },
       { role: ROLE_USER, content: userMessage },
     ];
   }
@@ -154,7 +184,6 @@ export class ChatBotService {
   private async parseJsonBody(
     response: Response,
   ): Promise<OmniRouteChatCompletionResponse> {
-  
     try {
       return (await response.json()) as OmniRouteChatCompletionResponse;
     } catch {

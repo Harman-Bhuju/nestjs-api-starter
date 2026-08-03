@@ -14,6 +14,7 @@ import { Throttle } from '@nestjs/throttler';
 import { ChatBotService } from '../service/chat-bot.service';
 import { ChatRequestDto } from '../dto/chat-request.dto';
 import { ChatResponseDto } from '../dto/chat-response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 const CHAT_BOT_THROTTLE_LIMIT = 10;
 const CHAT_BOT_THROTTLE_TTL_MS = 60000;
@@ -34,8 +35,9 @@ export class ChatBotController {
     description:
       'Sends a single, stateless message to the website assistant and returns its response. ' +
       'The assistant answers questions strictly related to this website (features, pricing, plans, FAQ, ' +
-      'support, authentication, refund policy and terms). Each request is fully independent: no conversation ' +
-      'history, memory, or data is stored on the server between calls.',
+      'support, authentication, refund policy and terms), and personalizes replies using the authenticated ' +
+      "visitor's name. Each request is fully independent: no conversation history is stored on the server " +
+      'between calls.',
   })
   @ApiOkResponse({
     description:
@@ -64,7 +66,8 @@ export class ChatBotController {
   })
   public async chat(
     @Body() chatRequestDto: ChatRequestDto,
+    @CurrentUser('sub') userId: string,
   ): Promise<ChatResponseDto> {
-    return this.chatBotService.chat(chatRequestDto);
+    return this.chatBotService.chat(chatRequestDto, userId);
   }
 }
