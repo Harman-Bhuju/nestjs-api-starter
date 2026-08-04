@@ -5,7 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import ormConfig from './config/database/orm.config';
 import ormConfigProd from './config/database/orm.config.prod';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { MessagingModule } from './modules/messaging/messaging.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -48,7 +47,6 @@ import { ChatBotModule } from './modules/chat-bot/chat-bot.module';
     UserModule,
     EmailModule,
     FileModule,
-    MessagingModule,
     SubscriptionsModule,
     PaymentModule,
     ChatBotModule,

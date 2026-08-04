@@ -7,10 +7,19 @@ import { setupSwagger } from './config/setups/swagger.setup';
 import { useContainer } from 'class-validator';
 import { setupLogger } from './config/setups/logger.setup';
 import { setupCors } from './config/setups/cors.setup';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   // bufferLogs holds startup logs until our custom logger is registered.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Trust the reverse proxy (e.g. Cloudflare, Nginx, Load Balancer).
+  // This allows Express/Fastify to detect the original client protocol (HTTP/HTTPS).
+  // Without this, req.secure may always be false because HTTPS is terminated at the proxy.
+  // for refresh-token cookie in order to not be sent with secure=false always in development
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+  app.use(cookieParser());
 
   const configService = app.get(ConfigService);
 
